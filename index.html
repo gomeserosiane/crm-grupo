@@ -1,0 +1,162 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CRM administrativo do Grupo Gomes & Rosiane.">
+  <title>CRM | Grupo Gomes & Rosiane</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="admin-body">
+  <main class="admin-shell">
+    <section class="login-view" id="login-view">
+      <form class="login-card" id="login-form">
+        <div class="login-logo">
+          <span class="brand-mark">GR</span>
+        </div>
+        <h1>Entrar no CRM</h1>
+        <p>Acesse com o usuário cadastrado no Supabase Auth.</p>
+        <label>E-mail do usuário</label>
+        <input type="email" id="username" autocomplete="username" required>
+        <label>Senha</label>
+        <input type="password" id="password" autocomplete="current-password" required>
+        <button class="button button-primary" type="submit"><i data-lucide="log-in"></i> Entrar</button>
+        <small id="login-message"></small>
+      </form>
+    </section>
+
+    <section class="crm-view hidden" id="crm-view">
+      <aside class="crm-sidebar">
+        <a class="brand crm-brand" href="https://site-teste-mauve.vercel.app" data-site-link>
+          <span class="brand-mark">GR</span>
+          <span>
+            <strong>Grupo Gomes & Rosiane</strong>
+            <small>Painel CRM</small>
+          </span>
+        </a>
+        <nav>
+          <a class="active" href="#dashboard" data-crm-tab="dashboard"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+          <a href="#editor" data-crm-tab="editor"><i data-lucide="newspaper"></i> Publicações do Blog</a>
+          <a href="#property-editor" data-crm-tab="property-editor"><i data-lucide="building-2"></i> Imóveis</a>
+          <a href="https://site-teste-mauve.vercel.app" data-site-link><i data-lucide="external-link"></i> Ver site</a>
+        </nav>
+      </aside>
+
+      <div class="crm-content">
+        <header class="crm-topbar">
+          <div>
+            <p class="section-kicker">Painel administrativo</p>
+            <h1 id="crm-page-title">Dashboard</h1>
+          </div>
+          <button class="button button-light" type="button" id="logout-button"><i data-lucide="log-out"></i> Sair</button>
+        </header>
+
+        <section class="dashboard-grid crm-panel active" id="dashboard" data-crm-panel="dashboard">
+          <article>
+            <span>Total de posts</span>
+            <strong id="total-posts">0</strong>
+          </article>
+          <article>
+            <span>Total de imóveis</span>
+            <strong id="total-properties">0</strong>
+          </article>
+          <article>
+            <span>Última atualização geral</span>
+            <strong id="last-update">Agora</strong>
+          </article>
+          <article>
+            <span>Banco de dados</span>
+            <strong id="storage-status">Local</strong>
+          </article>
+        </section>
+
+        <section class="editor-layout crm-panel hidden" id="editor" data-crm-panel="editor">
+          <form class="post-form" id="post-form">
+            <input type="hidden" id="post-id">
+            <input type="hidden" id="post-image">
+            <div class="form-title">
+              <h2 id="form-heading">Nova publicação</h2>
+              <button class="button button-light" type="button" id="clear-form"><i data-lucide="plus"></i> Novo</button>
+            </div>
+
+            <label class="upload-box" for="post-image-file">
+              <span><i data-lucide="image-up"></i> Importar imagem</span>
+              <small>Selecione uma imagem do computador, celular ou dispositivo usado no acesso.</small>
+              <input type="file" id="post-image-file" accept="image/*">
+            </label>
+            <img class="image-preview hidden" id="image-preview" alt="Prévia da imagem selecionada">
+
+            <label>Título<input type="text" id="post-title" required></label>
+            <label>Parágrafo<textarea id="post-content" rows="6" required></textarea></label>
+            <label>Link da notícia<input type="url" id="post-link" placeholder="https://exemplo.com/noticia" required></label>
+            <button class="button button-primary" type="submit"><i data-lucide="save"></i> Salvar publicação</button>
+            <small id="form-message"></small>
+          </form>
+
+          <div class="posts-table-wrap">
+            <div class="form-title">
+              <h2>Publicações cadastradas</h2>
+              <button class="button button-light" type="button" id="refresh-posts"><i data-lucide="refresh-cw"></i> Atualizar</button>
+            </div>
+            <div class="posts-table" id="admin-posts-list"></div>
+          </div>
+        </section>
+
+        <section class="editor-layout property-editor-layout crm-panel hidden" id="property-editor" data-crm-panel="property-editor">
+          <form class="post-form property-form" id="property-form">
+            <input type="hidden" id="property-id">
+            <input type="hidden" id="property-images">
+            <div class="form-title">
+              <h2 id="property-form-heading">Novo imóvel</h2>
+              <button class="button button-light" type="button" id="clear-property-form"><i data-lucide="plus"></i> Novo</button>
+            </div>
+
+            <label class="upload-box" for="property-image-files">
+              <span><i data-lucide="images"></i> Importar fotos do imóvel</span>
+              <small>Selecione uma ou mais imagens para o carrossel do imóvel.</small>
+              <input type="file" id="property-image-files" accept="image/*" multiple>
+            </label>
+            <div class="property-upload-preview" id="property-upload-preview"></div>
+
+            <label>Título do imóvel<input type="text" id="property-title" required></label>
+            <label>Status
+              <select id="property-status" required>
+                <option value="Disponível para alugar">Disponível para alugar</option>
+                <option value="Disponível para venda">Disponível para venda</option>
+                <option value="Imóvel alugado">Imóvel alugado</option>
+                <option value="Imóvel vendido">Imóvel vendido</option>
+              </select>
+            </label>
+            <label>Endereço<input type="text" id="property-address" required></label>
+            <label>Bairro<input type="text" id="property-neighborhood" required></label>
+            <label>Cidade<input type="text" id="property-city" required></label>
+            <button class="button button-primary" type="submit"><i data-lucide="save"></i> Salvar imóvel</button>
+            <small id="property-form-message"></small>
+          </form>
+
+          <div class="posts-table-wrap">
+            <div class="form-title">
+              <h2>Imóveis cadastrados</h2>
+              <button class="button button-light" type="button" id="refresh-properties"><i data-lucide="refresh-cw"></i> Atualizar</button>
+            </div>
+            <div class="properties-table" id="admin-properties-list"></div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
+
+

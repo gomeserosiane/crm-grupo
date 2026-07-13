@@ -1,0 +1,368 @@
+﻿.admin-body {
+  min-height: 100vh;
+  background: var(--soft);
+}
+
+.admin-shell {
+  min-height: 100vh;
+}
+
+.login-view {
+  position: relative;
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+  background:
+    linear-gradient(120deg, rgba(12, 58, 88, 0.84), rgba(18, 101, 254, 0.64)),
+    url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80") center/cover;
+}
+
+.login-view::before {
+  content: "CRM";
+  position: absolute;
+  top: 8%;
+  right: 7%;
+  color: rgba(255, 255, 255, 0.16);
+  font-size: clamp(6rem, 18vw, 15rem);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.login-card {
+  position: relative;
+  display: grid;
+  width: min(460px, 100%);
+  gap: 12px;
+  padding: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.64);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 28px 90px rgba(8, 39, 62, 0.28);
+  backdrop-filter: blur(16px);
+}
+
+.login-logo {
+  display: grid;
+  place-items: center;
+  margin: 4px 0 12px;
+}
+
+.login-card h1 {
+  margin: 0;
+  text-align: center;
+  font-size: 2.25rem;
+  line-height: 1;
+}
+
+.login-card p {
+  margin: 0 0 18px;
+  text-align: center;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.login-card .brand-mark {
+  width: 54px;
+  height: 54px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand-dark), var(--brand));
+}
+
+.login-card label {
+  margin-top: 4px;
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.login-card input {
+  min-height: 50px;
+  margin-bottom: 8px;
+  background: #f8fbfd;
+}
+
+#login-message,
+#form-message {
+  min-height: 18px;
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.crm-view {
+  display: grid;
+  min-height: 100vh;
+  grid-template-columns: 280px 1fr;
+}
+
+.crm-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding: 24px;
+  color: #0b2a40;
+  background: var(--brand);
+}
+
+.crm-brand {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin-bottom: 34px;
+  text-align: center;
+}
+
+.crm-brand .brand-mark {
+  width: 58px;
+  height: 58px;
+}
+
+.crm-brand small {
+  color: #244b63;
+}
+
+.crm-sidebar nav {
+  display: grid;
+  gap: 8px;
+}
+
+.crm-sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 12px;
+  border-radius: 8px;
+  color: #0b2a40;
+  font-weight: 800;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.crm-sidebar nav a.active,
+.crm-sidebar nav a:hover {
+  background: rgba(255, 255, 255, 0.48);
+  transform: translateX(2px);
+}
+
+.crm-content {
+  padding: 30px;
+}
+
+.crm-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.crm-topbar h1 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.dashboard-grid article,
+.post-form,
+.posts-table-wrap {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 12px 34px rgba(28, 70, 101, 0.08);
+}
+
+.dashboard-grid article {
+  padding: 22px;
+}
+
+.dashboard-grid span {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.dashboard-grid strong {
+  display: block;
+  margin-top: 10px;
+  font-size: 1.8rem;
+}
+
+.editor-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.crm-panel {
+  animation: crmPanelIn 0.28s ease both;
+}
+
+.post-form,
+.posts-table-wrap {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+}
+
+.post-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.post-form .form-title,
+.post-form .upload-box,
+.post-form .image-preview,
+.post-form .property-upload-preview,
+.post-form label:nth-of-type(3),
+.post-form button[type="submit"],
+.post-form #form-message,
+.post-form #property-form-message {
+  grid-column: 1 / -1;
+}
+
+.form-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.form-title h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.upload-box {
+  padding: 22px;
+  border: 1px dashed var(--brand-dark);
+  border-radius: 8px;
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+  cursor: pointer;
+}
+
+.upload-box span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 900;
+}
+
+.upload-box small {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+}
+
+.upload-box input {
+  display: none;
+}
+
+.post-form select {
+  width: 100%;
+  min-height: 50px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 13px 14px;
+  color: var(--ink);
+  background: #fff;
+  outline: none;
+}
+
+.image-preview {
+  width: 100%;
+  max-height: 320px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.posts-table {
+  display: grid;
+  gap: 18px;
+}
+
+.property-upload-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.property-upload-preview img {
+  width: 112px;
+  height: 78px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.properties-table {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.admin-property {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 12px 34px rgba(28, 70, 101, 0.08);
+}
+
+.admin-property img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.admin-property-content {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+}
+
+.admin-property-content h3 {
+  margin: 0;
+}
+
+.admin-property-content p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.admin-post {
+  min-height: 280px;
+  grid-template-columns: 340px 1fr;
+}
+
+.admin-post img {
+  min-height: 280px;
+}
+
+.admin-post .blog-card-content {
+  padding: 28px;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+@keyframes crmPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+

@@ -1,0 +1,231 @@
+﻿@media (max-width: 1180px) {
+  .hero-layout {
+    grid-template-columns: 1fr 0.72fr;
+  }
+
+  .blog-card {
+    grid-template-columns: 0.85fr 1fr;
+  }
+
+  .service-detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .service-detail-content {
+    grid-template-columns: 1fr;
+  }
+
+  .property-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .properties-table {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 980px) {
+  .menu-button {
+    display: grid;
+  }
+
+  .main-nav {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    display: none;
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: var(--shadow);
+  }
+
+  .main-nav.open {
+    display: grid;
+  }
+
+  .hero-layout,
+  .about-grid,
+  .contact-grid,
+  .crm-view,
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-logos {
+    max-width: 620px;
+  }
+
+  .blog-card {
+    grid-template-columns: 1fr;
+  }
+
+  .blog-card img {
+    height: 330px;
+    min-height: 330px;
+  }
+
+  .service-card img {
+    height: 300px;
+  }
+
+  .service-detail-section {
+    padding-top: 118px;
+  }
+
+  .detail-gallery img {
+    height: 360px;
+  }
+
+  .service-stage,
+  .blog-stage {
+    min-height: auto;
+  }
+
+  .crm-sidebar {
+    position: static;
+    height: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .container,
+  .site-header {
+    width: min(100% - 24px, 1180px);
+  }
+
+  .site-header {
+    top: 10px;
+  }
+
+  .brand strong {
+    font-size: 0.9rem;
+  }
+
+  .hero-section {
+    min-height: auto;
+    padding: 132px 0 60px;
+  }
+
+  .hero-content h1 {
+    font-size: clamp(2.1rem, 11vw, 3.25rem);
+  }
+
+  .metrics,
+  .dashboard-grid,
+  .post-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-post {
+    grid-template-columns: 1fr;
+  }
+
+  .slider-shell {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    gap: 8px;
+  }
+
+  .slider-arrow {
+    width: 44px;
+    height: 44px;
+  }
+
+  .service-card-body,
+  .blog-card-content {
+    padding: 24px;
+  }
+
+  .about-panel img {
+    height: 350px;
+  }
+
+  .crm-topbar,
+  .form-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero-logos {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .hero-logos img {
+    min-height: 112px;
+    padding: 14px;
+  }
+
+  .hero-actions,
+  .service-actions,
+  .button {
+    width: 100%;
+  }
+
+  .blog-meta {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .detail-actions {
+    width: 100%;
+  }
+
+  .partners-track img {
+    width: 150px;
+    height: 74px;
+  }
+
+  .property-lightbox-frame {
+    width: 94vw;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand small {
+    display: none;
+  }
+
+  .about-section,
+  .services-section,
+  .blog-section,
+  .contact-section {
+    padding: 62px 0;
+  }
+
+  .login-card,
+  .contact-form,
+  .crm-content,
+  .post-form,
+  .posts-table-wrap {
+    padding: 18px;
+  }
+
+  .slider-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .slider-arrow {
+    position: relative;
+    width: 100%;
+  }
+
+  .slider-arrow-left {
+    order: 2;
+  }
+
+  .service-stage,
+  .blog-stage {
+    order: 1;
+  }
+
+  .slider-arrow-right {
+    order: 3;
+  }
+}
+
+
