@@ -10,6 +10,8 @@ const AdminApp = (() => {
   const imageInput = document.getElementById("post-image");
   const fileInput = document.getElementById("post-image-file");
   const imagePreview = document.getElementById("image-preview");
+  const postImageActions = document.getElementById("post-image-actions");
+  const removePostImageButton = document.getElementById("remove-post-image");
   const propertyForm = document.getElementById("property-form");
   const propertyListElement = document.getElementById("admin-properties-list");
   const propertyImagesInput = document.getElementById("property-images");
@@ -20,9 +22,15 @@ const AdminApp = (() => {
   const tabLinks = [...document.querySelectorAll("[data-crm-tab]")];
   const panels = [...document.querySelectorAll("[data-crm-panel]")];
   const siteLinks = [...document.querySelectorAll("[data-site-link]")];
+  const postsPanel = document.getElementById("editor");
+  const propertiesPanel = document.getElementById("property-editor");
+  const backPostsButton = document.getElementById("back-posts");
+  const backPropertiesButton = document.getElementById("back-properties");
 
   let currentPosts = [];
   let currentProperties = [];
+  let activePostEditId = "";
+  let activePropertyEditId = "";
 
   const panelTitles = {
     dashboard: "Dashboard",
@@ -38,6 +46,9 @@ const AdminApp = (() => {
 
   // Exibe uma tela do CRM por vez, mantendo o menu lateral como navegação principal.
   function showPanel(panelId) {
+    if (panelId !== "editor") exitPostEditMode(false);
+    if (panelId !== "property-editor") exitPropertyEditMode(false);
+
     panels.forEach((panel) => panel.classList.toggle("hidden", panel.dataset.crmPanel !== panelId));
     panels.forEach((panel) => panel.classList.toggle("active", panel.dataset.crmPanel === panelId));
     tabLinks.forEach((link) => link.classList.toggle("active", link.dataset.crmTab === panelId));
@@ -95,6 +106,23 @@ const AdminApp = (() => {
   }
 
   // Lê a imagem enviada pelo usuário e transforma em texto para salvar no banco.
+  function showPostImage(image) {
+    imageInput.value = image;
+    imagePreview.src = image;
+    imagePreview.classList.remove("hidden");
+    postImageActions.classList.remove("hidden");
+  }
+
+  function removePostImage() {
+    imageInput.value = "";
+    fileInput.value = "";
+    imagePreview.removeAttribute("src");
+    imagePreview.classList.add("hidden");
+    postImageActions.classList.add("hidden");
+    messageElement.style.color = "var(--muted)";
+    messageElement.textContent = "Imagem removida. Importe uma nova imagem antes de salvar.";
+  }
+
   function setupImageUpload() {
     fileInput.addEventListener("change", () => {
       const file = fileInput.files[0];
@@ -102,12 +130,12 @@ const AdminApp = (() => {
 
       const reader = new FileReader();
       reader.onload = () => {
-        imageInput.value = reader.result;
-        imagePreview.src = reader.result;
-        imagePreview.classList.remove("hidden");
+        showPostImage(reader.result);
       };
       reader.readAsDataURL(file);
     });
+
+    removePostImageButton.addEventListener("click", removePostImage);
   }
 
   // Lê múltiplas fotos do imóvel para montar o carrossel exibido no site.
@@ -128,32 +156,76 @@ const AdminApp = (() => {
   }
 
   function renderPropertyPreview(images) {
-    propertyPreview.innerHTML = images.map((image) => `<img src="${image}" alt="Prévia do imóvel">`).join("");
+    propertyPreview.innerHTML = images.map((image, index) => `
+      <div class="property-preview-item">
+        <img src="${image}" alt="Prévia ${index + 1} do imóvel">
+        <button class="remove-property-image" type="button" data-remove-property-image="${index}" aria-label="Excluir foto ${index + 1}">
+          <i data-lucide="trash-2"></i>
+        </button>
+      </div>
+    `).join("");
+    lucide.createIcons();
+  }
+
+  function setupPropertyPreviewActions() {
+    propertyPreview.addEventListener("click", (event) => {
+      const removeButton = event.target.closest("[data-remove-property-image]");
+      if (!removeButton) return;
+
+      const images = JSON.parse(propertyImagesInput.value || "[]");
+      images.splice(Number(removeButton.dataset.removePropertyImage), 1);
+      propertyImagesInput.value = JSON.stringify(images);
+      propertyFilesInput.value = "";
+      renderPropertyPreview(images);
+
+      propertyMessageElement.style.color = images.length ? "var(--muted)" : "var(--danger)";
+      propertyMessageElement.textContent = images.length
+        ? "Foto removida. Salve o imóvel para confirmar a alteração."
+        : "Todas as fotos foram removidas. Importe ao menos uma foto antes de salvar.";
+    });
   }
 
   // Preenche o formulário para edição de uma publicação existente.
   function fillForm(post) {
+    activePostEditId = post.id;
     document.getElementById("post-id").value = post.id;
-    imageInput.value = post.image;
-    imagePreview.src = post.image;
-    imagePreview.classList.remove("hidden");
+    showPostImage(post.image);
     document.getElementById("post-title").value = post.title;
     document.getElementById("post-content").value = post.content;
     document.getElementById("post-link").value = post.link_url || "";
     document.getElementById("form-heading").textContent = "Editar publicação";
     messageElement.textContent = "";
+    postsPanel.classList.add("editing-mode");
+    backPostsButton.classList.remove("hidden");
+    listElement.innerHTML = "";
+    listElement.appendChild(createAdminPost(post, true));
     window.scrollTo({ top: 0, behavior: "smooth" });
+    lucide.createIcons();
   }
 
   // Limpa o formulário para iniciar uma nova publicação.
   function clearForm() {
+    activePostEditId = "";
     postForm.reset();
     document.getElementById("post-id").value = "";
     imageInput.value = "";
+    fileInput.value = "";
     imagePreview.removeAttribute("src");
     imagePreview.classList.add("hidden");
+    postImageActions.classList.add("hidden");
     document.getElementById("form-heading").textContent = "Nova publicação";
     messageElement.textContent = "";
+    postsPanel.classList.remove("editing-mode");
+    backPostsButton.classList.add("hidden");
+  }
+
+  async function exitPostEditMode(shouldRender = true) {
+    activePostEditId = "";
+    clearForm();
+    if (shouldRender) {
+      await renderAdmin();
+      showPanel("editor");
+    }
   }
 
   function updateDashboard(posts) {
@@ -169,7 +241,7 @@ const AdminApp = (() => {
     document.getElementById("last-update").textContent = latestDate ? formatDate(latestDate) : "Sem dados";
   }
 
-  function createAdminPost(post) {
+  function createAdminPost(post, isFocused = false) {
     const row = document.createElement("article");
     row.className = "admin-post blog-card";
     row.innerHTML = `
@@ -185,7 +257,7 @@ const AdminApp = (() => {
           <a class="button button-light" href="${post.link_url || "#"}" target="_blank" rel="noopener">Saiba mais</a>
         </div>
         <div class="admin-actions">
-          <button class="button button-light" type="button" data-edit="${post.id}">
+          <button class="button button-light ${isFocused ? "hidden" : ""}" type="button" data-edit="${post.id}">
             <i data-lucide="pencil"></i> Editar
           </button>
           <button class="button button-danger" type="button" data-delete="${post.id}">
@@ -201,6 +273,17 @@ const AdminApp = (() => {
     currentPosts = await BlogStorage.listPosts();
     listElement.innerHTML = "";
 
+    if (activePostEditId) {
+      const selectedPost = currentPosts.find((post) => post.id === activePostEditId);
+      if (selectedPost) {
+        listElement.appendChild(createAdminPost(selectedPost, true));
+        updateDashboard(currentPosts);
+        lucide.createIcons();
+        return;
+      }
+      clearForm();
+    }
+
     if (!currentPosts.length) {
       listElement.innerHTML = '<p class="empty-posts">Nenhuma publicação cadastrada.</p>';
     } else {
@@ -212,6 +295,7 @@ const AdminApp = (() => {
   }
 
   function fillPropertyForm(property) {
+    activePropertyEditId = property.id;
     document.getElementById("property-id").value = property.id;
     document.getElementById("property-title").value = property.title;
     document.getElementById("property-status").value = property.status;
@@ -222,20 +306,38 @@ const AdminApp = (() => {
     renderPropertyPreview(property.images || []);
     document.getElementById("property-form-heading").textContent = "Editar imóvel";
     propertyMessageElement.textContent = "";
+    propertiesPanel.classList.add("editing-mode");
+    backPropertiesButton.classList.remove("hidden");
+    propertyListElement.innerHTML = "";
+    propertyListElement.appendChild(createAdminProperty(property, true));
     showPanel("property-editor");
     document.getElementById("property-editor").scrollIntoView({ behavior: "smooth", block: "start" });
+    lucide.createIcons();
   }
 
   function clearPropertyForm() {
+    activePropertyEditId = "";
     propertyForm.reset();
     document.getElementById("property-id").value = "";
     propertyImagesInput.value = "";
+    propertyFilesInput.value = "";
     propertyPreview.innerHTML = "";
     document.getElementById("property-form-heading").textContent = "Novo imóvel";
     propertyMessageElement.textContent = "";
+    propertiesPanel.classList.remove("editing-mode");
+    backPropertiesButton.classList.add("hidden");
   }
 
-  function createAdminProperty(property) {
+  async function exitPropertyEditMode(shouldRender = true) {
+    activePropertyEditId = "";
+    clearPropertyForm();
+    if (shouldRender) {
+      await renderPropertiesAdmin();
+      showPanel("property-editor");
+    }
+  }
+
+  function createAdminProperty(property, isFocused = false) {
     const row = document.createElement("article");
     row.className = "admin-property";
     row.innerHTML = `
@@ -246,7 +348,7 @@ const AdminApp = (() => {
         <p>${property.address}</p>
         <p>${property.neighborhood} - ${property.city}</p>
         <div class="admin-actions">
-          <button class="button button-light" type="button" data-property-edit="${property.id}">
+          <button class="button button-light ${isFocused ? "hidden" : ""}" type="button" data-property-edit="${property.id}">
             <i data-lucide="pencil"></i> Editar
           </button>
           <button class="button button-danger" type="button" data-property-delete="${property.id}">
@@ -261,6 +363,17 @@ const AdminApp = (() => {
   async function renderPropertiesAdmin() {
     currentProperties = await PropertyStorage.listProperties();
     propertyListElement.innerHTML = "";
+
+    if (activePropertyEditId) {
+      const selectedProperty = currentProperties.find((property) => property.id === activePropertyEditId);
+      if (selectedProperty) {
+        propertyListElement.appendChild(createAdminProperty(selectedProperty, true));
+        updateDashboard(currentPosts);
+        lucide.createIcons();
+        return;
+      }
+      clearPropertyForm();
+    }
 
     if (!currentProperties.length) {
       propertyListElement.innerHTML = '<p class="empty-posts">Nenhum imóvel cadastrado.</p>';
@@ -344,15 +457,18 @@ const AdminApp = (() => {
           messageElement.textContent = "Publicação adicionada com sucesso.";
         }
 
-        clearForm();
-        renderAdmin();
+        await exitPostEditMode(true);
       } catch (error) {
         messageElement.style.color = "var(--danger)";
         messageElement.textContent = "Não foi possível salvar a publicação.";
       }
     });
 
-    document.getElementById("clear-form").addEventListener("click", clearForm);
+    document.getElementById("clear-form").addEventListener("click", async () => {
+      clearForm();
+      await renderAdmin();
+    });
+    backPostsButton.addEventListener("click", () => exitPostEditMode(true));
     document.getElementById("refresh-posts").addEventListener("click", renderAdmin);
   }
 
@@ -390,15 +506,18 @@ const AdminApp = (() => {
           propertyMessageElement.textContent = "Imóvel cadastrado com sucesso.";
         }
 
-        clearPropertyForm();
-        renderPropertiesAdmin();
+        await exitPropertyEditMode(true);
       } catch (error) {
         propertyMessageElement.style.color = "var(--danger)";
         propertyMessageElement.textContent = "Não foi possível salvar o imóvel.";
       }
     });
 
-    document.getElementById("clear-property-form").addEventListener("click", clearPropertyForm);
+    document.getElementById("clear-property-form").addEventListener("click", async () => {
+      clearPropertyForm();
+      await renderPropertiesAdmin();
+    });
+    backPropertiesButton.addEventListener("click", () => exitPropertyEditMode(true));
     document.getElementById("refresh-properties").addEventListener("click", renderPropertiesAdmin);
   }
 
@@ -407,6 +526,7 @@ const AdminApp = (() => {
     setupSidebarNavigation();
     setupImageUpload();
     setupPropertyImageUpload();
+    setupPropertyPreviewActions();
     setupForm();
     setupPropertyForm();
     setupPostActions();

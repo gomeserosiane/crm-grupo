@@ -92,7 +92,10 @@
             <input type="hidden" id="post-image">
             <div class="form-title">
               <h2 id="form-heading">Nova publicação</h2>
-              <button class="button button-light" type="button" id="clear-form"><i data-lucide="plus"></i> Novo</button>
+              <div class="form-title-actions">
+                <button class="button button-light hidden" type="button" id="back-posts"><i data-lucide="arrow-left"></i> Voltar</button>
+                <button class="button button-light" type="button" id="clear-form"><i data-lucide="plus"></i> Novo</button>
+              </div>
             </div>
 
             <label class="upload-box" for="post-image-file">
@@ -101,6 +104,11 @@
               <input type="file" id="post-image-file" accept="image/*">
             </label>
             <img class="image-preview hidden" id="image-preview" alt="Prévia da imagem selecionada">
+            <div class="image-preview-actions hidden" id="post-image-actions">
+              <button class="button button-danger" type="button" id="remove-post-image">
+                <i data-lucide="trash-2"></i> Excluir imagem selecionada
+              </button>
+            </div>
 
             <label>Título<input type="text" id="post-title" required></label>
             <label>Parágrafo<textarea id="post-content" rows="6" required></textarea></label>
@@ -127,8 +135,12 @@
             <input type="hidden" id="property-images">
             <div class="form-title">
               <h2 id="property-form-heading">Novo imóvel</h2>
-              <button class="button button-light" type="button" id="clear-property-form"><i data-lucide="plus"></i>
-                Novo</button>
+              <div class="form-title-actions">
+                <button class="button button-light hidden" type="button" id="back-properties"><i data-lucide="arrow-left"></i>
+                  Voltar</button>
+                <button class="button button-light" type="button" id="clear-property-form"><i data-lucide="plus"></i>
+                  Novo</button>
+              </div>
             </div>
 
             <label class="upload-box" for="property-image-files">
