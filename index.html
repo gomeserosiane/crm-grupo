@@ -101,14 +101,15 @@
             </div>
 
             <label class="upload-box" for="post-image-file">
-              <span><i data-lucide="image-up"></i> Importar imagem</span>
-              <small>Selecione uma imagem do computador, celular ou dispositivo usado no acesso.</small>
-              <input type="file" id="post-image-file" accept="image/*">
+              <span><i data-lucide="image-up"></i> Importar imagem ou vídeo</span>
+              <small>Selecione uma imagem ou vídeo do computador, celular ou dispositivo usado no acesso.</small>
+              <input type="file" id="post-image-file" accept="image/*,video/*">
             </label>
             <img class="image-preview hidden" id="image-preview" alt="Prévia da imagem selecionada">
+            <video class="image-preview hidden" id="video-preview" controls muted playsinline></video>
             <div class="image-preview-actions hidden" id="post-image-actions">
               <button class="button button-danger" type="button" id="remove-post-image">
-                <i data-lucide="trash-2"></i> Excluir imagem selecionada
+                <i data-lucide="trash-2"></i> Excluir mídia selecionada
               </button>
             </div>
 
@@ -146,9 +147,9 @@
             </div>
 
             <label class="upload-box" for="property-image-files">
-              <span><i data-lucide="images"></i> Importar fotos do imóvel</span>
-              <small>Selecione uma ou mais imagens para o carrossel do imóvel.</small>
-              <input type="file" id="property-image-files" accept="image/*" multiple>
+              <span><i data-lucide="images"></i> Importar fotos ou vídeos do imóvel</span>
+              <small>Selecione uma ou mais imagens/vídeos para o carrossel do imóvel.</small>
+              <input type="file" id="property-image-files" accept="image/*,video/*" multiple>
             </label>
             <div class="property-upload-preview" id="property-upload-preview"></div>
 

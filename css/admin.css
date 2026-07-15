@@ -227,6 +227,10 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.post-form.form-collapsed > :not(.form-title):not(input[type="hidden"]) {
+  display: none !important;
+}
+
 .post-form > * {
   min-width: 0;
 }
@@ -328,6 +332,7 @@
   max-height: 320px;
   border-radius: 8px;
   object-fit: cover;
+  background: #0b1720;
 }
 
 .image-preview-actions {
@@ -386,6 +391,13 @@
   object-fit: cover;
 }
 
+.property-preview-item video {
+  width: 112px;
+  height: 78px;
+  object-fit: cover;
+  background: #0b1720;
+}
+
 .remove-property-image {
   position: absolute;
   top: 6px;
@@ -434,6 +446,17 @@
   object-fit: cover;
 }
 
+.admin-property video,
+.admin-post video {
+  width: 100%;
+  object-fit: cover;
+  background: #0b1720;
+}
+
+.admin-property video {
+  height: 220px;
+}
+
 .admin-property-content {
   display: grid;
   gap: 10px;
@@ -456,6 +479,10 @@
 }
 
 .admin-post img {
+  min-height: 280px;
+}
+
+.admin-post video {
   min-height: 280px;
 }
 

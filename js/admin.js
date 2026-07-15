@@ -10,6 +10,7 @@ const AdminApp = (() => {
   const imageInput = document.getElementById("post-image");
   const fileInput = document.getElementById("post-image-file");
   const imagePreview = document.getElementById("image-preview");
+  const videoPreview = document.getElementById("video-preview");
   const postImageActions = document.getElementById("post-image-actions");
   const removePostImageButton = document.getElementById("remove-post-image");
   const propertyForm = document.getElementById("property-form");
@@ -39,6 +40,116 @@ const AdminApp = (() => {
     "flyer-editor": "Criar Panfleto"
   };
 
+  // Abre ou fecha o formulário de publicação e ajusta o texto do botão.
+  function setPostFormOpen(isOpen) {
+    postForm.classList.toggle("form-collapsed", !isOpen);
+    const buttonLabel = document.getElementById("clear-form");
+    buttonLabel.innerHTML = isOpen ? '<i data-lucide="x"></i> Fechar' : '<i data-lucide="plus"></i> Novo';
+    lucide.createIcons();
+  }
+
+  // Abre ou fecha o formulário de imóvel e ajusta o texto do botão.
+  function setPropertyFormOpen(isOpen) {
+    propertyForm.classList.toggle("form-collapsed", !isOpen);
+    const buttonLabel = document.getElementById("clear-property-form");
+    buttonLabel.innerHTML = isOpen ? '<i data-lucide="x"></i> Fechar' : '<i data-lucide="plus"></i> Novo';
+    lucide.createIcons();
+  }
+
+  // Identifica se uma mídia salva é vídeo pelo tipo base64 ou extensão.
+  function isVideoMedia(media) {
+    return String(media || "").startsWith("data:video") || /\.(mp4|webm|ogg)$/i.test(String(media || ""));
+  }
+
+  // Monta o HTML correto para exibir imagem ou vídeo em cards administrativos.
+  function createMediaMarkup(media, altText, className = "") {
+    if (isVideoMedia(media)) {
+      return `<video class="${className}" src="${media}" controls muted playsinline preload="metadata" aria-label="${altText}"></video>`;
+    }
+
+    return `<img class="${className}" src="${media}" alt="${altText}">`;
+  }
+
+  // Lê qualquer arquivo selecionado e retorna em formato base64.
+  function readFileAsDataUrl(file) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // Tenta comprimir vídeos no navegador usando canvas e MediaRecorder para reduzir peso.
+  async function compressVideoFile(file) {
+    if (!file.type.startsWith("video/") || !window.MediaRecorder) {
+      return readFileAsDataUrl(file);
+    }
+
+    try {
+      const video = document.createElement("video");
+      const sourceUrl = URL.createObjectURL(file);
+      video.src = sourceUrl;
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = "metadata";
+
+      await new Promise((resolve, reject) => {
+        video.onloadedmetadata = resolve;
+        video.onerror = reject;
+      });
+
+      const canvas = document.createElement("canvas");
+      const scale = Math.min(1, 720 / Math.max(video.videoWidth, video.videoHeight));
+      canvas.width = Math.max(320, Math.round(video.videoWidth * scale));
+      canvas.height = Math.max(240, Math.round(video.videoHeight * scale));
+      const context = canvas.getContext("2d");
+      const stream = canvas.captureStream(24);
+      const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp8") ? "video/webm;codecs=vp8" : "video/webm";
+      const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 900000 });
+      const chunks = [];
+
+      recorder.ondataavailable = (event) => {
+        if (event.data.size) chunks.push(event.data);
+      };
+
+      const finished = new Promise((resolve) => {
+        recorder.onstop = resolve;
+      });
+
+      recorder.start();
+      await video.play();
+
+      await new Promise((resolve) => {
+        const drawFrame = () => {
+          if (video.ended || video.paused) {
+            resolve();
+            return;
+          }
+
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          requestAnimationFrame(drawFrame);
+        };
+
+        drawFrame();
+      });
+
+      recorder.stop();
+      await finished;
+      URL.revokeObjectURL(sourceUrl);
+
+      const blob = new Blob(chunks, { type: "video/webm" });
+      if (!blob.size || blob.size > file.size) return readFileAsDataUrl(file);
+
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      return readFileAsDataUrl(file);
+    }
+  }
+
   // Alterna a interface entre tela de login e painel principal.
   function setLoggedState(isLogged) {
     loginView.classList.toggle("hidden", isLogged);
@@ -54,6 +165,8 @@ const AdminApp = (() => {
     panels.forEach((panel) => panel.classList.toggle("active", panel.dataset.crmPanel === panelId));
     tabLinks.forEach((link) => link.classList.toggle("active", link.dataset.crmTab === panelId));
     pageTitle.textContent = panelTitles[panelId] || "Dashboard";
+    if (panelId === "editor" && !activePostEditId) setPostFormOpen(false);
+    if (panelId === "property-editor" && !activePropertyEditId) setPropertyFormOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -108,64 +221,73 @@ const AdminApp = (() => {
     }).format(new Date(dateValue));
   }
 
-  // Lê a imagem enviada pelo usuário e transforma em texto para salvar no banco.
-  function showPostImage(image) {
-    imageInput.value = image;
-    imagePreview.src = image;
-    imagePreview.classList.remove("hidden");
+  // Exibe a prévia da mídia da publicação, seja imagem ou vídeo.
+  function showPostImage(media) {
+    imageInput.value = media;
+    imagePreview.classList.toggle("hidden", isVideoMedia(media));
+    videoPreview.classList.toggle("hidden", !isVideoMedia(media));
+
+    if (isVideoMedia(media)) {
+      videoPreview.src = media;
+      imagePreview.removeAttribute("src");
+    } else {
+      imagePreview.src = media;
+      videoPreview.removeAttribute("src");
+    }
+
     postImageActions.classList.remove("hidden");
   }
 
-  // Remove a imagem atual da publicação em edição ou cadastro.
+  // Remove a mídia atual da publicação em edição ou cadastro.
   function removePostImage() {
     imageInput.value = "";
     fileInput.value = "";
     imagePreview.removeAttribute("src");
+    videoPreview.removeAttribute("src");
     imagePreview.classList.add("hidden");
+    videoPreview.classList.add("hidden");
     postImageActions.classList.add("hidden");
     messageElement.style.color = "var(--muted)";
-    messageElement.textContent = "Imagem removida. Importe uma nova imagem antes de salvar.";
+    messageElement.textContent = "Mídia removida. Importe uma nova mídia antes de salvar.";
   }
 
-  // Configura o campo de upload de imagem da publicação.
+  // Configura o campo de upload de mídia da publicação.
   function setupImageUpload() {
-    fileInput.addEventListener("change", () => {
+    fileInput.addEventListener("change", async () => {
       const file = fileInput.files[0];
       if (!file) return;
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        showPostImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+      messageElement.style.color = "var(--muted)";
+      messageElement.textContent = file.type.startsWith("video/") ? "Otimizando vídeo..." : "";
+      showPostImage(await compressVideoFile(file));
+      messageElement.textContent = "";
     });
 
     removePostImageButton.addEventListener("click", removePostImage);
   }
 
-  // Lê múltiplas fotos do imóvel para montar o carrossel exibido no site.
+  // Lê múltiplas fotos ou vídeos do imóvel para montar o carrossel exibido no site.
   function setupPropertyImageUpload() {
     propertyFilesInput.addEventListener("change", async () => {
       const files = [...propertyFilesInput.files];
       if (!files.length) return;
 
-      const images = await Promise.all(files.map((file) => new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.readAsDataURL(file);
-      })));
+      propertyMessageElement.style.color = "var(--muted)";
+      propertyMessageElement.textContent = files.some((file) => file.type.startsWith("video/")) ? "Otimizando vídeos..." : "";
+      const images = await Promise.all(files.map((file) => compressVideoFile(file)));
 
       propertyImagesInput.value = JSON.stringify(images);
       renderPropertyPreview(images);
+      propertyMessageElement.textContent = "";
     });
   }
 
-  // Renderiza as miniaturas das fotos do imóvel com botões de remoção.
+  // Renderiza as miniaturas das fotos ou vídeos do imóvel com botões de remoção.
   function renderPropertyPreview(images) {
     propertyPreview.innerHTML = images.map((image, index) => `
       <div class="property-preview-item">
-        <img src="${image}" alt="Prévia ${index + 1} do imóvel">
-        <button class="remove-property-image" type="button" data-remove-property-image="${index}" aria-label="Excluir foto ${index + 1}">
+        ${createMediaMarkup(image, `Prévia ${index + 1} do imóvel`)}
+        <button class="remove-property-image" type="button" data-remove-property-image="${index}" aria-label="Excluir mídia ${index + 1}">
           <i data-lucide="trash-2"></i>
         </button>
       </div>
@@ -173,7 +295,7 @@ const AdminApp = (() => {
     lucide.createIcons();
   }
 
-  // Permite remover fotos específicas da lista de imagens do imóvel.
+  // Permite remover mídias específicas da lista de imagens ou vídeos do imóvel.
   function setupPropertyPreviewActions() {
     propertyPreview.addEventListener("click", (event) => {
       const removeButton = event.target.closest("[data-remove-property-image]");
@@ -187,8 +309,8 @@ const AdminApp = (() => {
 
       propertyMessageElement.style.color = images.length ? "var(--muted)" : "var(--danger)";
       propertyMessageElement.textContent = images.length
-        ? "Foto removida. Salve o imóvel para confirmar a alteração."
-        : "Todas as fotos foram removidas. Importe ao menos uma foto antes de salvar.";
+        ? "Mídia removida. Salve o imóvel para confirmar a alteração."
+        : "Todas as mídias foram removidas. Importe ao menos uma imagem ou vídeo antes de salvar.";
     });
   }
 
@@ -203,6 +325,7 @@ const AdminApp = (() => {
     document.getElementById("form-heading").textContent = "Editar publicação";
     messageElement.textContent = "";
     postsPanel.classList.add("editing-mode");
+    setPostFormOpen(true);
     backPostsButton.classList.remove("hidden");
     listElement.innerHTML = "";
     listElement.appendChild(createAdminPost(post, true));
@@ -218,7 +341,9 @@ const AdminApp = (() => {
     imageInput.value = "";
     fileInput.value = "";
     imagePreview.removeAttribute("src");
+    videoPreview.removeAttribute("src");
     imagePreview.classList.add("hidden");
+    videoPreview.classList.add("hidden");
     postImageActions.classList.add("hidden");
     document.getElementById("form-heading").textContent = "Nova publicação";
     messageElement.textContent = "";
@@ -255,7 +380,7 @@ const AdminApp = (() => {
     const row = document.createElement("article");
     row.className = "admin-post blog-card";
     row.innerHTML = `
-      <img src="${post.image}" alt="${post.title}">
+      ${createMediaMarkup(post.image, post.title)}
       <div class="blog-card-content">
         <h3>${post.title}</h3>
         <p>${post.content}</p>
@@ -319,6 +444,7 @@ const AdminApp = (() => {
     document.getElementById("property-form-heading").textContent = "Editar imóvel";
     propertyMessageElement.textContent = "";
     propertiesPanel.classList.add("editing-mode");
+    setPropertyFormOpen(true);
     backPropertiesButton.classList.remove("hidden");
     propertyListElement.innerHTML = "";
     propertyListElement.appendChild(createAdminProperty(property, true));
@@ -356,7 +482,7 @@ const AdminApp = (() => {
     const row = document.createElement("article");
     row.className = "admin-property";
     row.innerHTML = `
-      <img src="${property.images[0]}" alt="${property.title}">
+      ${createMediaMarkup(property.images[0], property.title)}
       <div class="admin-property-content">
         <span class="property-status">${property.status}</span>
         <h3>${property.title}</h3>
@@ -483,8 +609,10 @@ const AdminApp = (() => {
     });
 
     document.getElementById("clear-form").addEventListener("click", async () => {
+      const shouldOpen = postForm.classList.contains("form-collapsed");
       clearForm();
-      await renderAdmin();
+      setPostFormOpen(shouldOpen);
+      if (!shouldOpen) await renderAdmin();
     });
     backPostsButton.addEventListener("click", () => exitPostEditMode(true));
     document.getElementById("refresh-posts").addEventListener("click", renderAdmin);
@@ -499,7 +627,7 @@ const AdminApp = (() => {
 
       if (!images.length) {
         propertyMessageElement.style.color = "var(--danger)";
-        propertyMessageElement.textContent = "Importe ao menos uma foto do imóvel.";
+        propertyMessageElement.textContent = "Importe ao menos uma imagem ou vídeo do imóvel.";
         return;
       }
 
@@ -533,8 +661,10 @@ const AdminApp = (() => {
     });
 
     document.getElementById("clear-property-form").addEventListener("click", async () => {
+      const shouldOpen = propertyForm.classList.contains("form-collapsed");
       clearPropertyForm();
-      await renderPropertiesAdmin();
+      setPropertyFormOpen(shouldOpen);
+      if (!shouldOpen) await renderPropertiesAdmin();
     });
     backPropertiesButton.addEventListener("click", () => exitPropertyEditMode(true));
     document.getElementById("refresh-properties").addEventListener("click", renderPropertiesAdmin);
@@ -551,6 +681,8 @@ const AdminApp = (() => {
     setupPropertyForm();
     setupPostActions();
     setupPropertyActions();
+    setPostFormOpen(false);
+    setPropertyFormOpen(false);
     const session = await SupabaseAuth.getSession();
     setLoggedState(Boolean(session));
 
