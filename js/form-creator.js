@@ -132,15 +132,25 @@ const FormCreator = (() => {
     context.closePath();
   }
 
-  // Escreve um texto em uma linha e reduz com reticências quando usado em campos curtos.
-  function drawFitText(context, text, x, y, maxWidth) {
-    let content = String(text);
+  // Divide palavras longas para que nenhuma informação ultrapasse a largura disponível.
+  function splitLongWord(context, word, maxWidth) {
+    const parts = [];
+    let part = "";
 
-    while (context.measureText(content).width > maxWidth && content.length > 4) {
-      content = `${content.slice(0, -4)}...`;
-    }
+    [...String(word)].forEach((character) => {
+      const testPart = `${part}${character}`;
 
-    context.fillText(content, x, y);
+      if (context.measureText(testPart).width > maxWidth && part) {
+        parts.push(part);
+        part = character;
+        return;
+      }
+
+      part = testPart;
+    });
+
+    if (part) parts.push(part);
+    return parts;
   }
 
   // Divide um texto em várias linhas respeitando a largura máxima disponível.
@@ -150,6 +160,16 @@ const FormCreator = (() => {
     let line = "";
 
     words.forEach((word) => {
+      if (context.measureText(word).width > maxWidth) {
+        if (line) {
+          lines.push(line);
+          line = "";
+        }
+
+        lines.push(...splitLongWord(context, word, maxWidth));
+        return;
+      }
+
       const testLine = line ? `${line} ${word}` : word;
 
       if (context.measureText(testLine).width > maxWidth && line) {
@@ -163,6 +183,17 @@ const FormCreator = (() => {
 
     if (line) lines.push(line);
     return lines;
+  }
+
+  // Escreve textos do card de contato em várias linhas, sem cortar com reticências.
+  function drawWrappedContactText(context, text, x, y, maxWidth, lineHeight) {
+    const lines = getWrappedLines(context, text, maxWidth);
+
+    lines.forEach((line, index) => {
+      context.fillText(line, x, y + (index * lineHeight));
+    });
+
+    return y + (lines.length * lineHeight);
   }
 
   // Escreve a lista de parágrafos com quebra de linha natural dentro do container.
@@ -279,15 +310,17 @@ const FormCreator = (() => {
     context.font = "800 26px Inter, Arial, sans-serif";
 
     if (consultantEnabled) {
-      drawFitText(context, name, 690, 1040, 230);
-      drawFitText(context, company, 690, 1122, 198);
-      drawFitText(context, phone, 690, 1197, 188);
+      let cursorY = 1040;
+      cursorY = drawWrappedContactText(context, name, 690, cursorY, 330, 32) + 18;
+      cursorY = drawWrappedContactText(context, company, 690, cursorY, 330, 32) + 18;
+      drawWrappedContactText(context, phone, 690, cursorY, 330, 32);
       return;
     }
 
-    drawFitText(context, name, 250, 1140, 260);
-    drawFitText(context, company, 250, 1195, 226);
-    drawFitText(context, phone, 250, 1248, 214);
+    let cursorY = 1140;
+    cursorY = drawWrappedContactText(context, name, 250, cursorY, 560, 32) + 16;
+    cursorY = drawWrappedContactText(context, company, 250, cursorY, 560, 32) + 16;
+    drawWrappedContactText(context, phone, 250, cursorY, 560, 32);
   }
 
   // Atualiza o canvas ao vivo conforme as escolhas do ADM.
