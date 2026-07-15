@@ -11,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/form-creator.css">
   <link rel="stylesheet" href="css/responsive.css">
 </head>
 
@@ -53,6 +54,7 @@
             Dashboard</a>
           <a href="#editor" data-crm-tab="editor"><i data-lucide="newspaper"></i> Publicações do Blog</a>
           <a href="#property-editor" data-crm-tab="property-editor"><i data-lucide="building-2"></i> Imóveis</a>
+          <a href="#flyer-editor" data-crm-tab="flyer-editor"><i data-lucide="file-image"></i> Criar Panfleto</a>
           <a href="https://site-teste-mauve.vercel.app" data-site-link><i data-lucide="external-link"></i> Ver site</a>
         </nav>
       </aside>
@@ -175,6 +177,62 @@
             <div class="properties-table" id="admin-properties-list"></div>
           </div>
         </section>
+
+        <section class="flyer-layout crm-panel hidden" id="flyer-editor" data-crm-panel="flyer-editor">
+          <form class="post-form flyer-form" id="flyer-form">
+            <div class="form-title">
+              <h2>Criar panfleto</h2>
+              <button class="button button-light" type="button" id="reset-flyer"><i data-lucide="rotate-ccw"></i> Limpar</button>
+            </div>
+
+            <label>Título
+              <select id="flyer-title">
+                <option value="imobiliaria">Imobiliária</option>
+                <option value="otica">Ótica</option>
+                <option value="planos">Planos de saúde</option>
+                <option value="odontologia">Odontologia</option>
+                <option value="seguro">Seguro de vida</option>
+                <option value="funeraria">Funerária</option>
+              </select>
+            </label>
+            <label>Modelo de cor
+              <select id="flyer-color-mode">
+                <option value="solid">Cor única</option>
+                <option value="gradient">Degradê</option>
+              </select>
+            </label>
+            <label>Cor principal<input type="color" id="flyer-color-primary" value="#dfdfdf"></label>
+            <label class="flyer-secondary-color">Cor secundária<input type="color" id="flyer-color-secondary" value="#8fd7ff"></label>
+
+            <fieldset class="flyer-consultant-choice">
+              <legend>Inserir consultor no panfleto?</legend>
+              <label><input type="radio" name="flyer-consultant-enabled" value="yes" checked> Sim</label>
+              <label><input type="radio" name="flyer-consultant-enabled" value="no"> Não</label>
+            </fieldset>
+
+            <label class="flyer-consultant-select" id="flyer-consultant-select-wrap">Consultor
+              <select id="flyer-consultant">
+                <option value="consultor-1">Consultor 1</option>
+                <option value="consultor-2">Consultor 2</option>
+                <option value="consultor-3">Consultor 3</option>
+                <option value="consultor-4">Consultor 4</option>
+              </select>
+            </label>
+
+            <label class="flyer-name-field">Nome<input type="text" id="flyer-name" value=""></label>
+            <label>Empresa<input type="text" id="flyer-company" value=""></label>
+            <label>Telefone<input type="tel" id="flyer-phone" value=""></label>
+
+          </form>
+
+          <div class="flyer-preview-panel">
+            <div class="form-title">
+              <h2>Prévia do panfleto</h2>
+            </div>
+            <canvas class="flyer-canvas" id="flyer-canvas" width="1080" height="1350"></canvas>
+            <button class="button button-primary" type="button" id="download-flyer"><i data-lucide="download"></i> Baixar</button>
+          </div>
+        </section>
       </div>
     </section>
   </main>
@@ -184,6 +242,7 @@
   <script src="js/config.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/admin.js"></script>
+  <script src="js/form-creator.js"></script>
 </body>
 
 </html>

@@ -35,7 +35,8 @@ const AdminApp = (() => {
   const panelTitles = {
     dashboard: "Dashboard",
     editor: "Publicações do Blog",
-    "property-editor": "Imóveis"
+    "property-editor": "Imóveis",
+    "flyer-editor": "Criar Panfleto"
   };
 
   // Alterna a interface entre tela de login e painel principal.
@@ -56,6 +57,7 @@ const AdminApp = (() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  // Configura os links do menu lateral e mantém o link do site atualizado.
   function setupSidebarNavigation() {
     siteLinks.forEach((link) => {
       link.href = config.SITE_URL || "https://site-teste-mauve.vercel.app";
@@ -98,6 +100,7 @@ const AdminApp = (() => {
     });
   }
 
+  // Formata datas do banco para exibição em padrão brasileiro.
   function formatDate(dateValue) {
     return new Intl.DateTimeFormat("pt-BR", {
       dateStyle: "short",
@@ -113,6 +116,7 @@ const AdminApp = (() => {
     postImageActions.classList.remove("hidden");
   }
 
+  // Remove a imagem atual da publicação em edição ou cadastro.
   function removePostImage() {
     imageInput.value = "";
     fileInput.value = "";
@@ -123,6 +127,7 @@ const AdminApp = (() => {
     messageElement.textContent = "Imagem removida. Importe uma nova imagem antes de salvar.";
   }
 
+  // Configura o campo de upload de imagem da publicação.
   function setupImageUpload() {
     fileInput.addEventListener("change", () => {
       const file = fileInput.files[0];
@@ -155,6 +160,7 @@ const AdminApp = (() => {
     });
   }
 
+  // Renderiza as miniaturas das fotos do imóvel com botões de remoção.
   function renderPropertyPreview(images) {
     propertyPreview.innerHTML = images.map((image, index) => `
       <div class="property-preview-item">
@@ -167,6 +173,7 @@ const AdminApp = (() => {
     lucide.createIcons();
   }
 
+  // Permite remover fotos específicas da lista de imagens do imóvel.
   function setupPropertyPreviewActions() {
     propertyPreview.addEventListener("click", (event) => {
       const removeButton = event.target.closest("[data-remove-property-image]");
@@ -219,6 +226,7 @@ const AdminApp = (() => {
     backPostsButton.classList.add("hidden");
   }
 
+  // Fecha o modo de edição de publicação e recarrega a listagem quando necessário.
   async function exitPostEditMode(shouldRender = true) {
     activePostEditId = "";
     clearForm();
@@ -228,6 +236,7 @@ const AdminApp = (() => {
     }
   }
 
+  // Atualiza os indicadores do dashboard com posts, imóveis e última atualização.
   function updateDashboard(posts) {
     const lastPostDate = posts[0]?.created_at;
     const lastPropertyDate = currentProperties[0]?.created_at;
@@ -241,6 +250,7 @@ const AdminApp = (() => {
     document.getElementById("last-update").textContent = latestDate ? formatDate(latestDate) : "Sem dados";
   }
 
+  // Cria o card administrativo de uma publicação do blog.
   function createAdminPost(post, isFocused = false) {
     const row = document.createElement("article");
     row.className = "admin-post blog-card";
@@ -269,6 +279,7 @@ const AdminApp = (() => {
     return row;
   }
 
+  // Carrega e exibe as publicações cadastradas no CRM.
   async function renderAdmin() {
     currentPosts = await BlogStorage.listPosts();
     listElement.innerHTML = "";
@@ -294,6 +305,7 @@ const AdminApp = (() => {
     lucide.createIcons();
   }
 
+  // Preenche o formulário para editar um imóvel já cadastrado.
   function fillPropertyForm(property) {
     activePropertyEditId = property.id;
     document.getElementById("property-id").value = property.id;
@@ -315,6 +327,7 @@ const AdminApp = (() => {
     lucide.createIcons();
   }
 
+  // Limpa o formulário de imóveis e sai do modo de edição.
   function clearPropertyForm() {
     activePropertyEditId = "";
     propertyForm.reset();
@@ -328,6 +341,7 @@ const AdminApp = (() => {
     backPropertiesButton.classList.add("hidden");
   }
 
+  // Fecha o modo de edição de imóvel e recarrega a listagem quando necessário.
   async function exitPropertyEditMode(shouldRender = true) {
     activePropertyEditId = "";
     clearPropertyForm();
@@ -337,6 +351,7 @@ const AdminApp = (() => {
     }
   }
 
+  // Cria o card administrativo de um imóvel cadastrado.
   function createAdminProperty(property, isFocused = false) {
     const row = document.createElement("article");
     row.className = "admin-property";
@@ -360,6 +375,7 @@ const AdminApp = (() => {
     return row;
   }
 
+  // Carrega e exibe os imóveis cadastrados no CRM.
   async function renderPropertiesAdmin() {
     currentProperties = await PropertyStorage.listProperties();
     propertyListElement.innerHTML = "";
@@ -407,6 +423,7 @@ const AdminApp = (() => {
     });
   }
 
+  // Centraliza os cliques de editar e excluir imóveis.
   function setupPropertyActions() {
     propertyListElement.addEventListener("click", async (event) => {
       const editButton = event.target.closest("[data-property-edit]");
@@ -428,6 +445,7 @@ const AdminApp = (() => {
     });
   }
 
+  // Configura o formulário de criação e edição de publicações.
   function setupForm() {
     postForm.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -472,6 +490,7 @@ const AdminApp = (() => {
     document.getElementById("refresh-posts").addEventListener("click", renderAdmin);
   }
 
+  // Configura o formulário de criação e edição de imóveis.
   function setupPropertyForm() {
     propertyForm.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -521,6 +540,7 @@ const AdminApp = (() => {
     document.getElementById("refresh-properties").addEventListener("click", renderPropertiesAdmin);
   }
 
+  // Inicializa autenticação, eventos, dados e estado inicial do CRM.
   async function init() {
     setupLogin();
     setupSidebarNavigation();
@@ -547,4 +567,3 @@ const AdminApp = (() => {
 })();
 
 AdminApp.init();
-

@@ -147,6 +147,7 @@
     align-items: flex-start;
     flex-direction: column;
   }
+
 }
 
 @media (max-width: 560px) {
@@ -183,6 +184,7 @@
   .property-lightbox-frame {
     width: 94vw;
   }
+
 }
 
 @media (max-width: 480px) {

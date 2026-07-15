@@ -4,10 +4,12 @@ const SupabaseAuth = (() => {
   const config = window.APP_CONFIG;
   let client = null;
 
+  // Verifica se as credenciais do Supabase e a biblioteca estão disponíveis.
   function isConfigured() {
     return Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY && window.supabase);
   }
 
+  // Cria ou reutiliza a instância do cliente Supabase.
   function getClient() {
     if (!isConfigured()) return null;
 
@@ -18,6 +20,7 @@ const SupabaseAuth = (() => {
     return client;
   }
 
+  // Faz login do usuário usando Supabase Auth.
   async function signIn(email, password) {
     const supabaseClient = getClient();
 
@@ -34,12 +37,14 @@ const SupabaseAuth = (() => {
     return data.session;
   }
 
+  // Encerra a sessão atual no Supabase Auth.
   async function signOut() {
     const supabaseClient = getClient();
     if (!supabaseClient) return;
     await supabaseClient.auth.signOut();
   }
 
+  // Busca a sessão atual do usuário autenticado.
   async function getSession() {
     const supabaseClient = getClient();
     if (!supabaseClient) return null;
@@ -47,6 +52,7 @@ const SupabaseAuth = (() => {
     return data.session;
   }
 
+  // Retorna o token de acesso usado nas permissões de escrita.
   async function getAccessToken() {
     const session = await getSession();
     return session?.access_token || "";
@@ -139,6 +145,7 @@ const BlogStorage = (() => {
     localStorage.setItem(localKey, JSON.stringify(posts));
   }
 
+  // Lista publicações do blog vindas do Supabase ou do armazenamento local.
   async function listPosts() {
     if (hasSupabaseConfig()) {
       return supabaseRequest(`${config.TABLE_NAME}?select=*&order=created_at.desc`);
@@ -147,6 +154,7 @@ const BlogStorage = (() => {
     return getLocalPosts().sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }
 
+  // Cria uma nova publicação no Supabase ou no armazenamento local.
   async function createPost(post) {
     const payload = {
       id: crypto.randomUUID(),
@@ -167,6 +175,7 @@ const BlogStorage = (() => {
     return payload;
   }
 
+  // Atualiza uma publicação existente pelo id informado.
   async function updatePost(id, post) {
     if (hasSupabaseConfig()) {
       const rows = await supabaseRequest(`${config.TABLE_NAME}?id=eq.${id}`, {
@@ -181,6 +190,7 @@ const BlogStorage = (() => {
     return posts.find((item) => item.id === id);
   }
 
+  // Remove uma publicação pelo id informado.
   async function deletePost(id) {
     if (hasSupabaseConfig()) {
       await supabaseRequest(`${config.TABLE_NAME}?id=eq.${id}`, { method: "DELETE" });
@@ -253,10 +263,12 @@ const PropertyStorage = (() => {
     }
   ];
 
+  // Confere se os imóveis devem usar Supabase ou fallback local.
   function hasSupabaseConfig() {
     return Boolean(config.SUPABASE_URL && config.SUPABASE_ANON_KEY);
   }
 
+  // Monta uma requisição REST para a tabela de imóveis no Supabase.
   async function supabaseRequest(path, options = {}) {
     const method = (options.method || "GET").toUpperCase();
     const accessToken = method === "GET" ? "" : await SupabaseAuth.getAccessToken();
@@ -279,6 +291,7 @@ const PropertyStorage = (() => {
     return response.status === 204 ? [] : response.json();
   }
 
+  // Carrega imóveis do localStorage ou cria dados iniciais de demonstração.
   function getLocalProperties() {
     const savedProperties = JSON.parse(localStorage.getItem(localKey) || "null");
 
@@ -290,10 +303,12 @@ const PropertyStorage = (() => {
     return seedProperties;
   }
 
+  // Salva a lista completa de imóveis no localStorage.
   function setLocalProperties(properties) {
     localStorage.setItem(localKey, JSON.stringify(properties));
   }
 
+  // Garante que o campo de imagens do imóvel esteja sempre como lista.
   function normalizeProperty(property) {
     return {
       ...property,
@@ -303,6 +318,7 @@ const PropertyStorage = (() => {
     };
   }
 
+  // Lista imóveis cadastrados a partir do Supabase ou do localStorage.
   async function listProperties() {
     if (hasSupabaseConfig()) {
       const rows = await supabaseRequest(`${config.PROPERTY_TABLE_NAME}?select=*&order=created_at.desc`);
@@ -314,6 +330,7 @@ const PropertyStorage = (() => {
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }
 
+  // Cria um novo imóvel no Supabase ou no armazenamento local.
   async function createProperty(property) {
     const payload = {
       id: crypto.randomUUID(),
@@ -334,6 +351,7 @@ const PropertyStorage = (() => {
     return payload;
   }
 
+  // Atualiza um imóvel existente pelo id informado.
   async function updateProperty(id, property) {
     if (hasSupabaseConfig()) {
       const rows = await supabaseRequest(`${config.PROPERTY_TABLE_NAME}?id=eq.${id}`, {
@@ -348,6 +366,7 @@ const PropertyStorage = (() => {
     return properties.find((item) => item.id === id);
   }
 
+  // Remove um imóvel pelo id informado.
   async function deleteProperty(id) {
     if (hasSupabaseConfig()) {
       await supabaseRequest(`${config.PROPERTY_TABLE_NAME}?id=eq.${id}`, { method: "DELETE" });
