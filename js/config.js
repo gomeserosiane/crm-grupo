@@ -6,6 +6,6 @@ window.APP_CONFIG = {
   TABLE_NAME: "blog_posts",
   PROPERTY_TABLE_NAME: "real_estate_properties",
   DEFAULT_PROPERTY_LINK: "https://gomeserosiane.com.br",
-  SITE_URL: "https://site-teste-mauve.vercel.app"
+  SITE_URL: "https://www.grupogomeserosiane.com.br/"
 };
 
