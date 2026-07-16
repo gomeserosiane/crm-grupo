@@ -185,7 +185,7 @@ const FormCreator = (() => {
     return lines;
   }
 
-  // Escreve textos do card de contato em várias linhas, sem cortar com reticências.
+  // Escreve textos do card de contato centralizados em várias linhas, sem cortar com reticências.
   function drawWrappedContactText(context, text, x, y, maxWidth, lineHeight) {
     const lines = getWrappedLines(context, text, maxWidth);
 
@@ -298,7 +298,7 @@ const FormCreator = (() => {
 
     context.save();
     if (consultantEnabled) {
-      roundedRect(context, 668, 998, 390, 272, 52);
+      roundedRect(context, 668, 998, 390, 282, 52);
     } else {
       roundedRect(context, 228, 1096, 630, 220, 52);
     }
@@ -308,19 +308,23 @@ const FormCreator = (() => {
 
     context.fillStyle = "#0b1720";
     context.font = "800 26px Inter, Arial, sans-serif";
+    context.textAlign = "center";
+    context.textBaseline = "top";
 
     if (consultantEnabled) {
       let cursorY = 1040;
-      cursorY = drawWrappedContactText(context, name, 690, cursorY, 330, 32) + 18;
-      cursorY = drawWrappedContactText(context, company, 690, cursorY, 330, 32) + 18;
-      drawWrappedContactText(context, phone, 690, cursorY, 330, 32);
+      cursorY = drawWrappedContactText(context, name, 863, cursorY, 330, 32) + 18;
+      cursorY = drawWrappedContactText(context, company, 863, cursorY, 330, 32) + 18;
+      drawWrappedContactText(context, phone, 863, cursorY, 330, 32);
+      context.textAlign = "left";
       return;
     }
 
     let cursorY = 1140;
-    cursorY = drawWrappedContactText(context, name, 250, cursorY, 560, 32) + 16;
-    cursorY = drawWrappedContactText(context, company, 250, cursorY, 560, 32) + 16;
-    drawWrappedContactText(context, phone, 250, cursorY, 560, 32);
+    cursorY = drawWrappedContactText(context, name, 543, cursorY, 560, 32) + 16;
+    cursorY = drawWrappedContactText(context, company, 543, cursorY, 560, 32) + 16;
+    drawWrappedContactText(context, phone, 543, cursorY, 560, 32);
+    context.textAlign = "left";
   }
 
   // Atualiza o canvas ao vivo conforme as escolhas do ADM.
